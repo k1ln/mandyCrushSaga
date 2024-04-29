@@ -1,0 +1,483 @@
+<html>
+  <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet"> 
+  <style>
+    .font{
+      font-family: Pacifico; 
+      font-size: 80px;
+    }
+    .cell{
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-style: solid;
+      border-width: 1px;
+      border-color: black;
+      background:white;
+      display: inline-block;
+      -webkit-transition: all 1s linear;
+        -moz-transition: all 1s linear;
+        -o-transition: all 1s linear;
+        transition: all 1s linear;
+    }
+
+    .cellsolved{
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-style: solid;
+      border-width: 1px;
+      border-color: black;
+      background:chartreuse;
+      display: inline-block;
+      -webkit-transition: all 1s linear;
+        -moz-transition: all 1s linear;
+        -o-transition: all 1s linear;
+        transition: all 1s linear;
+    }
+
+    .red{
+      height: 36px;
+      width: 36px;
+      border-style: solid;
+      border-width: 2px;
+      border-color: red;
+    }
+    .redcell
+    {
+      height: 40px;
+      width: 40px;
+      border-radius:20px;
+      margin:10px;
+      background-image:url('mandy1.png');
+    }
+    .bluecell
+    {
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-radius:20px;
+      background-image:url('mandy2.png');
+    }
+    .greencell
+    {
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-radius:20px;
+      background-image:url('mandy3.png');
+    }
+    .yellowcell
+    {
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-radius:20px;
+      background-image:url('mandy4.png');
+    }
+    .blackcell
+    {
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-radius:20px;
+      background-image:url('mandy5.png');
+    }
+    .greycell
+    {
+      height: 40px;
+      width: 40px;
+      margin:10px;
+      border-radius:20px;
+      background-image:url('mandy6.png');
+    }
+  </style>
+  <script>
+    var firstclicked = false;
+    function createRowDiv(irow)
+    {
+      var div = document.createElement("div");
+      div.setAttribute("id","row" + irow);
+      return div;
+    }
+
+    firstdiv=null;
+    cleaningpoints = 0;
+
+
+    async function clickCell(e)
+    {
+      e = e || window.event;
+      var cell = e.target;
+      if (firstclicked == false)
+      {
+        firstclicked = true;
+        //cell.className = "cell";
+        cell.classList.add("red");
+        firstdiv = cell;
+      }
+      else
+      {
+        //check if clickable if not make firstclick  
+        var cellclassName = cell.className;
+        firstdiv.classList.remove("red");
+        var arr = cell.id.split("-");
+        var arr1 = firstdiv.id.split("-");
+        var diff1 = arr1[0]*1 - arr[0]*1;
+        var diff2 = arr1[1]*1 - arr[1]*1;
+        
+        if((diff1==0 && diff2 ==-1)
+        || (diff1==0 && diff2 ==1)
+        || (diff1==1 && diff2 ==0)
+        || (diff1==-1 && diff2 ==0))
+        {
+          cell.className = firstdiv.className;
+          firstdiv.className = cellclassName;
+          firstclicked = false;
+          var iclean = 0;
+          while (iclean < 3)
+          {
+
+            var bclean = checkandClean()
+            if(bclean)
+            {
+              await Sleep(1000);
+            }
+            if(bclean == false)
+            {
+              iclean++;
+            }
+            
+            cleanEmpty();
+            if(bclean)
+            {
+              await Sleep(1000);
+              iclean = 0;
+            }
+          }
+          solvedToCell();
+          console.log("P"+points);
+          console.log("CP:"+cleaningpoints);
+          points = points*1 + cleaningpoints*1 * (70 + cleaningpoints * 5);
+          cleaningpoints = 0;
+          document.getElementById("punkte").innerHTML = points + " Pkt."; 
+        }
+        else
+        {
+          firstclicked = false;
+          firstdiv.classList.remove("red");
+        }
+      }
+    }
+
+    function Sleep(milliseconds) {
+      return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
+    var cellClassArr = [
+    'redcell',
+    'bluecell',
+    'greencell',
+    'yellowcell',
+    'blackcell',
+    'greycell'
+    ];
+
+    function createCell(irow,icol)
+    {
+      var div = document.createElement("div");
+      div.setAttribute("id",irow + "-" + icol);
+      div.className = "cell " + cellClassArr[Math.floor(Math.random()*6)];
+      div.addEventListener("click",clickCell)
+      return div;
+    }
+
+    function returnClass(d)
+    {
+      if(d!==undefined && d !== null)
+      {
+        return d.className.replace("cell ","");
+      }
+      else
+      {
+        return null;
+      }
+      
+    }
+
+    function solvedToCell(){
+      var irow = 0;
+      while(irow<rowlength)
+      {
+        var icol = 0;
+        while(icol < columnlength)
+        {
+          if(returnClass(document.getElementById(irow+'-'+icol)) == "cellsolved")
+          {
+            document.getElementById(irow+'-'+icol).className = "cell";
+          }
+          icol++;
+        }
+        irow++;
+      }
+    }
+
+    function cleanEmpty()
+    {
+      var irow = 0;
+      while(irow<rowlength)
+      {
+        var icol = 0;
+        while(icol < columnlength)
+        {
+          if(returnClass(document.getElementById(irow+'-'+icol)) == "cellsolved"
+          || returnClass(document.getElementById(irow+'-'+icol)) == "cell")
+          {
+            iirow = irow;
+            while(iirow>=0)
+            {
+                if(iirow-1 >= 0)
+                {
+                    document.getElementById(iirow+'-'+icol).className = document.getElementById((iirow-1)+'-'+icol).className;
+                }
+                else
+                {
+                    document.getElementById(iirow+'-'+icol).className = 'cell';
+                }
+                
+                iirow--;
+            } 
+          }
+          icol++;
+        }
+        irow++;
+      }
+    }
+
+    function fillupempty()
+    {
+      var irow = 0;
+      while(irow<rowlength)
+      {
+        var icol = 0;
+        while(icol < columnlength)
+        {
+          if (returnClass(document.getElementById(irow+'-'+icol)) == "cellsolved"
+          || returnClass(document.getElementById(irow+'-'+icol)) == "cell")
+          {
+            document.getElementById(irow+'-'+icol).className =  "cell " + cellClassArr[Math.floor(Math.random()*6)];
+          }
+          icol++;
+        }
+        irow++;
+      }
+    }
+
+    var pointarr = [];
+
+    function resetpoints()
+    {
+      pointarr = [];
+    }
+
+    function checkifpoints(irow,icol)
+    {
+      if(pointarr[irow+"-"+icol]==undefined)
+      {
+        return 1;
+        pointarr[irow+"-"+icol] = true;
+      }
+      else
+      {
+        return 0;
+      }
+    }
+  
+    
+
+    function checkandClean(){
+      var irow = 0;
+      var cleaned = false;
+      while(irow<rowlength)
+      {
+        var icol = 0;
+        while(icol < columnlength)
+        {
+          var classi = returnClass(document.getElementById(irow+'-'+icol));
+          if(classi !== "cellsolved" && classi !==null && classi !== "cell")
+          {
+            iicol = icol+1;
+            iirow = irow+1;
+            var i_c_equal = 1;
+            var diff = false;
+            while(diff==false&&iicol<columnlength)
+            {
+                if(classi==returnClass(document.getElementById(irow+'-'+iicol)))
+                {
+                i_c_equal++;
+                }
+                else
+                {
+                diff = true;
+                }
+                if (diff==false)
+                {
+                    iicol++;
+                }
+            }
+            
+            var i_r_equal = 1;
+            var diff = false;
+            while(diff==false&&iirow<rowlength)
+            {
+                if(classi==returnClass(document.getElementById(iirow+'-'+icol)))
+                {
+                i_r_equal++;
+                }
+                else
+                {
+                diff = true;
+                }
+                if (diff==false)
+                {
+                    iirow++;
+                }
+            }
+
+            if(i_r_equal>=3)
+            {
+                iirow--;
+                while(iirow>=irow)
+                {
+                  document.getElementById(iirow+'-'+icol).className = "cellsolved";
+                  var iiicol = icol+1;
+                  cleaningpoints += checkifpoints(iirow,icol);
+                  while(classi==returnClass(document.getElementById(iirow+'-'+iiicol)))
+                  {
+                    document.getElementById(iirow+'-'+iiicol).className = "cellsolved";
+                    cleaningpoints += checkifpoints(iirow,iiicol);
+                    iiicol++;
+                  }
+                  var iiicol = icol-1;
+                  while(classi==returnClass(document.getElementById(iirow+'-'+iiicol)))
+                  {
+                    document.getElementById(iirow+'-'+iiicol).className = "cellsolved";
+                    cleaningpoints += checkifpoints(iirow,iiicol);
+                    iiicol--;
+                  }
+                  iirow--;
+                }
+                cleaned = true;
+            }
+
+            if(i_c_equal>=3)
+            {
+                iicol--;
+                while(iicol>=icol)
+                {
+                  document.getElementById(irow+'-'+iicol).className = "cellsolved";
+                  cleaningpoints += checkifpoints(irow,iicol);
+                  var iiirow = irow+1;
+                  while(classi==returnClass(document.getElementById(iiirow+'-'+iicol)))
+                  {
+                    document.getElementById(iiirow+'-'+iicol).className = "cellsolved";
+                    cleaningpoints += checkifpoints(iiirow,iicol);
+                    iiirow++;
+                  }
+                  var iiirow = irow - 1;
+                  while(classi==returnClass(document.getElementById(iiirow+'-'+iicol)))
+                  {
+                    document.getElementById(iiirow+'-'+iicol).className = "cellsolved";
+                    cleaningpoints += checkifpoints(iiirow,iicol);
+                    iiirow--;
+                  }  
+                  iicol--;
+                }
+                cleaned = true;
+                resetpoints();
+            }
+          
+          }
+          //while(icol)
+          icol++;
+        }
+        irow++;
+      }
+      console.log("D")
+      return cleaned;
+    }
+
+    var rowlength = 10;
+    var columnlength = 10; 
+    var points = 0;
+    function initgame(rowlength,columnlength)
+    {
+      points = 0;
+      resetpoints();
+      document.getElementById("punkte").innerHTML = "0 Pkt.";
+      var game = document.getElementById("game");
+      game.innerHTML = "";
+      var irow = 0;
+      while(irow<rowlength)
+      {
+        var icol = 0;
+        var div = createRowDiv(irow);
+        game.appendChild(div);
+        while(icol < columnlength)
+        {
+          var cell = createCell(irow,icol);
+          div.appendChild(cell);
+          icol++;
+        }
+        irow++;
+      }
+
+
+      //checkintegrity
+      var iclean = 0
+      while (iclean < 3)
+      {
+        var blclean = checkandClean();
+        if(blclean==false)
+        {
+          iclean++;
+        }
+        if(blclean)
+        {
+          iclean = 0;
+        }
+        fillupempty();
+      }
+    }
+    
+  </script>
+  <body>
+    <span class="font" style="color:deeppink">M</span>
+    <span class="font" style="color:black">a</span>
+    <span class="font" style="color:yellow">n</span>
+    <span class="font" style="color:lightskyblue">d</span>
+    <span class="font" style="color:greenyellow">y</span>
+    <span class="font" style="color:deeppink">C</span>
+    <span class="font" style="color:green">r</span>
+    <span class="font" style="color:blue">u</span>
+    <span class="font" style="color:orange">s</span>
+    <span class="font" style="color:pink">h</span>
+    <span class="font" style="color:deeppink">S</span>
+    <span class="font" style="color:yellow">a</span>
+    <span class="font" style="color:brown">g</span>
+    <span class="font" style="color:blueviolet">a</span>
+    <div id="game"></div>
+    <span class="font" id="punkte">0 Pkt.</span>
+    Rows:<input type="text"  id="y" value="10"/>
+    Columns:<input type="text"  id="x" value="10"/>
+    <input type="button" onclick="initgamehandle()" value="Neues Spiel!"/>
+  </body>
+  <script>
+    function initgamehandle()
+    {
+      rowlength = document.getElementById("y").value;
+      columnlength = document.getElementById("x").value;
+      initgame(rowlength,columnlength);  
+    }
+    initgame(rowlength,columnlength);
+  </script>
+</html>
